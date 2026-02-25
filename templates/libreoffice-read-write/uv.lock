@@ -1,0 +1,39 @@
+version = 1
+revision = 3
+requires-python = ">=3.13"
+
+[[package]]
+name = "py"
+version = "1.4.22"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/46/a7/a8e030ef1163f0e28c49a098422e0d5307c4925b3a3e44df0a06f602258d/py-1.4.22.tar.gz", hash = "sha256:1ef0c4eb8f12f970dd831f32755f95a36af66a8ca9c35991100146428fd42474", size = 189283, upload-time = "2014-07-17T08:55:05.498Z" }
+
+[[package]]
+name = "pytest"
+version = "2.6.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "py" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a5/4c/82253e6fa5bdfb16fa560d1569c9e28b797fafc0a41602725743f5cdb922/pytest-2.6.0.tar.gz", hash = "sha256:1e4f7c23d5444c01316bd84edd629af3170331fade12bcc263f0a2a716bbaed1", size = 625374, upload-time = "2014-07-20T11:03:22.157Z" }
+
+[[package]]
+name = "python-cli-uv"
+version = "0.1.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "uno" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "uno", specifier = ">=0.3.3" }]
+
+[[package]]
+name = "uno"
+version = "0.3.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "py" },
+    { name = "pytest" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/54/67/10513a0b50fb6974f0b8f53c171e161a281d2f28b951aeadbb722871b9a6/uno-0.3.3.tar.gz", hash = "sha256:2037b35b5f038c8156c273b963d1c4afd536f72939b1bb86a17460d4251935c4", size = 7558, upload-time = "2014-08-04T19:59:45.676Z" }
