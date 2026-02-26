@@ -1,7 +1,13 @@
 import os
+from packages.math import sum
+
+
+def echo(s):
+    return s
+
 
 def main():
-    print("Hello from python-cli-uv!")
+    print(f"Hello from python-cli-uv! 2+2={sum(2, 2)}")
 
 
 if __name__ == "__main__":
