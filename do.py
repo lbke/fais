@@ -1,5 +1,6 @@
 from os import path
 from shutil import copy
+import sys
 
 from langchain.tools import tool
 from langchain_mistralai import ChatMistralAI
@@ -61,8 +62,8 @@ agent = create_agent(
 )
 
 
-if __name__ == "__main__":
-    args = parser.parse_args()
+def run(argv):
+    args = parser.parse_args(args=argv)
     print(args)
     if not args.prompt:
         print("Bonjour !")
@@ -77,3 +78,7 @@ if __name__ == "__main__":
         if "model" in chunk:
             for msg in chunk["model"]["messages"]:
                 msg.pretty_print()
+
+
+if __name__ == "__main__":
+    run(sys.argv)
