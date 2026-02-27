@@ -1,6 +1,6 @@
 from os import path
 import unittest
-from do import run
+from fais import run
 from libs import xmlzip
 
 

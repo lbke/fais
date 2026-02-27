@@ -9,3 +9,12 @@ dependencies = [
     "langchain-mistralai>=1.1.1",
     "langgraph-cli[inmem]>=0.4.12",
 ]
+
+[tool.setuptools.packages.find]
+include = ["libs*"]
+
+[tool.setuptools]
+py-modules = ["fais"]
+
+[project.scripts]
+fais = "fais:main"

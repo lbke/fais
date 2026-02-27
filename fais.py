@@ -80,5 +80,8 @@ def run(argv):
                 msg.pretty_print()
 
 
-if __name__ == "__main__":
+def main():
     run(sys.argv)
+
+if __name__ == "__main__":
+    main()
