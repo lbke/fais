@@ -11,10 +11,8 @@ dependencies = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["libs*"]
-
-[tool.setuptools]
-py-modules = ["fais"]
+# TODO: it's probably better to move "fais.py" into "cli" or "libs" or whatever
+include = ["libs*", "*.py"]
 
 [project.scripts]
 fais = "fais:main"
