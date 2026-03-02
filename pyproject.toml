@@ -1,5 +1,5 @@
 [project]
-name = "lbke-ai-tools"
+name = "fais"
 version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
@@ -10,9 +10,13 @@ dependencies = [
     "langgraph-cli[inmem]>=0.4.12",
 ]
 
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [tool.setuptools.packages.find]
 # TODO: it's probably better to move "fais.py" into "cli" or "libs" or whatever
-include = ["libs*", "*.py"]
+where = ["libs"]
 
 [project.scripts]
 fais = "fais:main"

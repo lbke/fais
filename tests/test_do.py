@@ -1,7 +1,7 @@
 from os import path
 import unittest
-from fais import run
-from libs import xmlzip
+from libs.fais import run
+from libs.utils import xmlzip
 
 
 class TestDo(unittest.TestCase):
