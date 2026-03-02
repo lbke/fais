@@ -7,6 +7,7 @@ from langchain.agents import create_agent
 import argparse
 
 from libs.tools.documents import open_document, update_document
+from libs.tools.planning import planning_intersection
 
 parser = argparse.ArgumentParser(
     prog='do',
@@ -32,7 +33,7 @@ agent = create_agent(
     mais qu'il n'apparaît pas dans la liste des fichiers,
     n'invente pas de contenu et préviens l'utilisateur.
 """,
-    tools=[update_document, open_document]
+    tools=[update_document, open_document, planning_intersection]
 )
 
 
@@ -49,10 +50,13 @@ def run(argv):
     {args.files}
     """
     # @see https://forum.langchain.com/t/prevent-last-llm-call-after-tool-calls/3063
+    last_msg = None
     for chunk in agent.stream({"messages": user_prompt}):
         if "model" in chunk:
             for msg in chunk["model"]["messages"]:
                 msg.pretty_print()
+                last_msg = msg
+    return last_msg
 
 
 def main():
