@@ -15,8 +15,8 @@ requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-# TODO: it's probably better to move "fais.py" into "cli" or "libs" or whatever
-where = ["libs"]
+where = ["."]
+include = ["libs*"]
 
 [project.scripts]
-fais = "fais:main"
+fais = "libs.fais:main"

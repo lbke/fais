@@ -7,10 +7,23 @@ from libs.utils import xmlzip
 
 
 @tool
-def open_document(filepath: str) -> str:
+def open_text_file(filepath: str) -> str:
+    """
+    Open .txt or .md files
+    Assumes the file uses utf8 encoding
+    Returns the file's text content
+    """
+    with open(filepath, 'r', encoding="utf-8") as f:
+        return f.read()
+
+
+@tool
+def open_document_file(filepath: str) -> str:
     """
     Use to open .docx or .odt documents
-    Returns their text content
+    (Microsoft Word, Libre Office files).
+    Returns the file's main text content
+    Text content is structured in XML
     """
     return xmlzip.extract_content_xml_from_zip(filepath)
 
