@@ -8,8 +8,11 @@ from langchain.agents import create_agent
 
 import argparse
 
-from libs.tools.documents import open_document, update_document
-from libs.tools.planning import planning_intersection
+from libs.tools.documents import TOOLS as document_tools 
+from libs.tools.planning import TOOLS as planning_tools
+from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
+
+ALL_TOOLS=[*document_tools, *planning_tools, *fileexplorer_tools]
 
 parser = argparse.ArgumentParser(
     prog='do',
@@ -27,7 +30,8 @@ model = ChatMistralAI(
 agent = create_agent(
     model=model,
     system_prompt="""
-    Tu es "do", un agent IA exécuté dans un terminal.
+    Tu es "fais", un agent IA exécuté dans un terminal.
+
     Tu dois exécuter des tâches bureatiques sur des fichiers.
     Mobilise les outils qui te sont fournis pour accomplir ces tâches.
 
@@ -35,7 +39,9 @@ agent = create_agent(
     mais qu'il n'apparaît pas dans la liste des fichiers,
     n'invente pas de contenu et préviens l'utilisateur.
 """,
-    tools=[update_document, open_document, planning_intersection]
+    tools=[
+        *ALL_TOOLS
+        ]
 )
 
 
@@ -65,6 +71,9 @@ def build_prompt(args: ParsedArgs):
     user_prompt = f"""
     Message de l'utilisateur:
     {args["prompt"]}
+    """
+    meta_prompt = f"""
+    Tu es exécuté dans le dossier
     """
     prompt = f"{user_prompt}"
     if (args["files"]):

@@ -37,3 +37,6 @@ def planning_intersection(i1: TextDateInterval, i2: TextDateInterval) -> tuple[d
     Output false if impossible to obtain 
     """
     return intersection(i1, i2)
+
+
+TOOLS=[planning_intersection]

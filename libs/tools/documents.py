@@ -6,6 +6,7 @@ from langchain.tools import tool
 from libs.utils import xmlzip
 
 
+
 @tool
 def open_text_file(filepath: str) -> str:
     """
@@ -42,3 +43,6 @@ def update_document(filepath: str, newcontent: str) -> str:
     copy(filepath, copyfilepath)
     xmlzip.update_zip_inner_file(copyfilepath, newcontent)
     return copyfilepath
+
+
+TOOLS=[open_text_file, open_document_file, update_document]
