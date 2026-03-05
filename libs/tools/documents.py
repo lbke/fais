@@ -8,6 +8,17 @@ from xml.etree import ElementTree
 
 
 @tool
+def copy_file(filepath: str, new_directory_or_filepath: str):
+    """
+    Copy a file to a new location
+    The new path can be a directory, in which case the new file has the same name as the previous one
+    The new path can also be a file, in which case the new file has a different name
+    Use this tool to create new files from a template
+    """
+    copy(filepath, new_directory_or_filepath)
+
+
+@tool
 def open_document_file_as_xml(filepath: str) -> str:
     """
     Use to open .docx or .odt documents
@@ -45,19 +56,20 @@ def read_document_file_text_content(filepath: str) -> str:
 def update_document_with_xml(filepath: str, new_xml_content: str) -> str:
     """
     Updates a document
-    This will never actually update the document,
-    in order to avoid data loss,
-    but instead generate an updated copy of the document
-    Returns the new document path if succesful
+    Returns the updated document path if succesful
     """
+    # Until we figure a rollback mechanism, this will never actually update the document,
+    # in order to avoid data loss,
+    # but instead generate an updated copy of the document
     filename, ext = path.splitext(filepath)
     copyfilepath = f"{filename}_copy{ext}"
     copy(filepath, copyfilepath)
+
     xmlzip.update_zip_inner_file(copyfilepath, new_xml_content)
     return copyfilepath
 
 
-TOOLS = [read_text_file, read_document_file_text_content,
+TOOLS = [copy_file, read_text_file, read_document_file_text_content,
          open_document_file_as_xml, update_document_with_xml]
 
 # Explains the relationship between tools
