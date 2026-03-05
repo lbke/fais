@@ -1,0 +1,6 @@
+---
+globs: tests
+alwaysApply: false
+---
+
+- use unittest as the testing framework

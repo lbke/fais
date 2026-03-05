@@ -5,8 +5,14 @@
 
 ## Local install
 
-```
+
+```sh
 uv sync
+```
+
+For building:
+```sh
+./install-locally.sh
 ```
 
 ## Usage

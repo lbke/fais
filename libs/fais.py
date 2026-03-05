@@ -8,11 +8,11 @@ from langchain.agents import create_agent
 
 import argparse
 
-from libs.tools.documents import TOOLS as document_tools 
+from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
 
-ALL_TOOLS=[*document_tools, *planning_tools, *fileexplorer_tools]
+ALL_TOOLS = [*document_tools, *planning_tools, *fileexplorer_tools]
 
 parser = argparse.ArgumentParser(
     prog='do',
@@ -38,10 +38,16 @@ agent = create_agent(
     Si un prompt fait référence à un fichier
     mais qu'il n'apparaît pas dans la liste des fichiers,
     n'invente pas de contenu et préviens l'utilisateur.
+
+    ## Outils à ta disposition
+    - Ouverture/mise à jour de documents : 
+    {document_tools_prompt}
+    - Exploration de dossiers et fichiers
+    - Planification dans un calendrier
 """,
     tools=[
         *ALL_TOOLS
-        ]
+    ]
 )
 
 
