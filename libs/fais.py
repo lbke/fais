@@ -23,27 +23,27 @@ parser.add_argument("prompt")
 parser.add_argument("files", nargs="*")
 
 model = ChatMistralAI(
-    model_name="mistral-small-2506"
+    model_name="mistral-large-latest"
 )
 
 
 agent = create_agent(
     model=model,
     system_prompt="""
-    Tu es "fais", un agent IA exécuté dans un terminal.
+    You are "fais", an AI agent running as a CLI.
+    You speak French fluently.
 
-    Tu dois exécuter des tâches bureatiques sur des fichiers.
-    Mobilise les outils qui te sont fournis pour accomplir ces tâches.
+    You must operate administrative tasks on files.
+    Use the tools at your disposal to achieve the task assigned by the user.
 
-    Si un prompt fait référence à un fichier
-    mais qu'il n'apparaît pas dans la liste des fichiers,
-    n'invente pas de contenu et préviens l'utilisateur.
+    When tasked to read a file, never invent fake content.
 
-    ## Outils à ta disposition
-    - Ouverture/mise à jour de documents : 
-    {document_tools_prompt}
-    - Exploration de dossiers et fichiers
-    - Planification dans un calendrier
+    Do not propose any subsequent task, just do what you are asked.
+
+    ## Tools at your disposal
+    - Handling text documents: {document_tools_prompt}
+    - Exploring files and folders
+    - Planning events in a calendar, handling a schedule
 """,
     tools=[
         *ALL_TOOLS
@@ -91,25 +91,28 @@ Fichiers fournis:
     return prompt
 
 
-def run(argv):
+def fais(argv):
+    """
+    [prompt, file1, file2...]
+    """
     args = validate_args(argv)
     prompt = build_prompt(args)
 
     # @see https://forum.langchain.com/t/prevent-last-llm-call-after-tool-calls/3063
-    last_msg = None
+    messages = []
     for chunk in agent.stream({"messages": prompt}):
         if "model" in chunk:
             for msg in chunk["model"]["messages"]:
                 msg.pretty_print()
-                last_msg = msg
+                messages.append(msg)
         else:
             print(chunk)
-    return last_msg
+    return messages
 
 
 def main():
     print(f"Running from {sys.argv[0]}")
-    run(sys.argv[1:])
+    fais(sys.argv[1:])
 
 
 if __name__ == "__main__":

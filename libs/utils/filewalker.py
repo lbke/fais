@@ -5,7 +5,7 @@ EXCLUDED_FOLDERS = {"__pycache__", "node_modules"}
 MAX_LENGTH = 100
 
 
-def walk_folder(folder_path: str, max_depth: int = None)->list[str]:
+def walk_folder(folder_path: str, max_depth: int = None) -> list[str]:
     all_dirs = []
     # We favour relative path for now
     # folder_path = os.path.abspath(folder_path)
@@ -31,10 +31,10 @@ def walk_folder(folder_path: str, max_depth: int = None)->list[str]:
     return all_dirs
 
 
-def list_folder_files(folder_path: str)->list[str]:
+def list_folder_files(folder_path: str) -> list[str]:
     files = []
     with os.scandir(folder_path) as it:
         for entry in it:
             if entry.is_file() and not entry.name.startswith('.'):
-                files.append(join(folder_path,entry.path))
+                files.append(entry.path)
     return files

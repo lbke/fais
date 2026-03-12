@@ -18,5 +18,10 @@ build-backend = "setuptools.build_meta"
 where = ["."]
 include = ["libs*"]
 
+[dependency-groups]
+dev = [
+    "agentevals>=0.0.9",
+]
+
 [project.scripts]
 fais = "libs.fais:main"

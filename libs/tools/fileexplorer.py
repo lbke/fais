@@ -4,10 +4,11 @@ from libs.utils.filewalker import walk_folder, list_folder_files
 
 
 @tool
-def explore_folders(folder_path: str) -> list[str]:
+def list_subfolders(folder_path: str) -> list[str]:
     """
     Explore a folder to list its subfolders.
     Returns a list of directories (without files)
+
     If no folder is explicitely provided, assume "./" as the starting point
     (current execution folder)
     It is expected to call this function multiple times to find a specific folder,
@@ -28,4 +29,4 @@ def list_files(folder_path: str) -> str:
     return files
 
 
-TOOLS = [explore_folders, list_files]
+TOOLS = [list_subfolders, list_files]
