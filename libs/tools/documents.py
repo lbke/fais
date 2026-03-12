@@ -49,7 +49,7 @@ def read_document_file_text_content(filepath: str) -> str:
     This function loses the XML structure of the document (not suited for later updates)
     """
     xml = xmlzip.extract_content_xml_from_zip(filepath)
-    return ElementTree(xml).tostring()
+    return str(ElementTree.tostring(ElementTree.Element(xml)))
 
 
 @tool
