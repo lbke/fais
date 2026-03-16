@@ -10,3 +10,5 @@ class TestDocumentsTools(unittest.TestCase):
         filepath = path.join(dir, "./assets/foo.odt")
         content = read_document_file_text_content.invoke(filepath)
         self.assertTrue(content.find("foo") > -1)
+        # No XML left
+        self.assertFalse(content.find("<") > -1)

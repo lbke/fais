@@ -49,7 +49,9 @@ def read_document_file_text_content(filepath: str) -> str:
     This function loses the XML structure of the document (not suited for later updates)
     """
     xml = xmlzip.extract_content_xml_from_zip(filepath)
-    return str(ElementTree.tostring(ElementTree.Element(xml)))
+    root = ElementTree.fromstring(xml)
+    text_chunks = [chunk.strip() for chunk in root.itertext() if chunk and chunk.strip()]
+    return " ".join(text_chunks)
 
 
 @tool

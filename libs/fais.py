@@ -2,7 +2,6 @@ import os
 import sys
 from typing import Optional, TypedDict
 
-from langchain.tools import tool
 from langchain_mistralai import ChatMistralAI
 from langchain.agents import create_agent
 
@@ -22,8 +21,10 @@ parser = argparse.ArgumentParser(
 parser.add_argument("prompt")
 parser.add_argument("files", nargs="*")
 
+BIG_MODEL = "mistral-large-latest"
+SMALL_MODEL = "mistral-small-latest"
 model = ChatMistralAI(
-    model_name="mistral-large-latest"
+    model_name=SMALL_MODEL
 )
 
 
@@ -78,9 +79,9 @@ def build_prompt(args: ParsedArgs):
     Message de l'utilisateur:
     {args["prompt"]}
     """
-    meta_prompt = f"""
-    Tu es exécuté dans le dossier
-    """
+    # meta_prompt = f"""
+    # Tu es exécuté dans le dossier
+    # """
     prompt = f"{user_prompt}"
     if (args["files"]):
         file_prompt = f"""
