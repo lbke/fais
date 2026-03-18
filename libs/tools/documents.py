@@ -15,7 +15,10 @@ def copy_file(filepath: str, new_directory_or_filepath: str):
     The new path can also be a file, in which case the new file has a different name
     Use this tool to create new files from a template
     """
-    copy(filepath, new_directory_or_filepath)
+    try:
+        copy(filepath, new_directory_or_filepath)
+    except FileNotFoundError as err:
+        return f"Warning: {err}"
 
 
 @tool
@@ -50,7 +53,8 @@ def read_document_file_text_content(filepath: str) -> str:
     """
     xml = xmlzip.extract_content_xml_from_zip(filepath)
     root = ElementTree.fromstring(xml)
-    text_chunks = [chunk.strip() for chunk in root.itertext() if chunk and chunk.strip()]
+    text_chunks = [chunk.strip() for chunk in root.itertext()
+                   if chunk and chunk.strip()]
     return " ".join(text_chunks)
 
 
