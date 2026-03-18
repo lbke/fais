@@ -17,6 +17,7 @@ def copy_file(filepath: str, new_directory_or_filepath: str):
     """
     try:
         copy(filepath, new_directory_or_filepath)
+        return "Success"
     except FileNotFoundError as err:
         return f"Warning: {err}"
 
