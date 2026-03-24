@@ -36,6 +36,22 @@ uv tool update-shell
 fais "prompt" ./file1 ./file2
 ```
 
+## Shell completion
+
+Install dependencies and the editable CLI first:
+
+```sh
+./install-dev.sh
+```
+
+Then enable completion in your current shell session:
+
+```sh
+eval "$(register-python-argcomplete fais)"
+```
+
+To persist it in bash, add this line to your `~/.bashrc`.
+
 ## Technologies
 
 - LangChain for the agent loop

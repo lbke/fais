@@ -7,11 +7,15 @@ from langchain.agents import create_agent
 
 import argparse
 
+import argcomplete
+
+from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
 
-ALL_TOOLS = [*document_tools, *planning_tools, *fileexplorer_tools]
+ALL_TOOLS = [*document_tools, *planning_tools,
+             *fileexplorer_tools, *thunderbird_tools]
 
 parser = argparse.ArgumentParser(
     prog='do',
@@ -20,6 +24,7 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("prompt")
 parser.add_argument("files", nargs="*")
+argcomplete.autocomplete(parser)
 
 BIG_MODEL = "mistral-large-latest"
 SMALL_MODEL = "mistral-small-latest"
