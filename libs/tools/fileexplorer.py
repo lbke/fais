@@ -4,10 +4,11 @@ from libs.utils.filewalker import walk_folder, list_folder_files
 
 
 @tool
-def list_subfolders(folder_path: str) -> list[str]:
+def list_subfolders(folder_path: str, depth: int) -> list[str]:
     """
     Explore a folder to list its subfolders.
     Returns a list of directories (without files)
+    Depth is limited to one level : call this tool multiple time to explore nested folders.
 
     If no folder is explicitely provided, assume "./" as the starting point
     (current execution folder)
@@ -16,7 +17,10 @@ def list_subfolders(folder_path: str) -> list[str]:
     If you need to explore a specific folder, call this tool again with a nested folder_path.
     To read the files for a folder, use `list_files` tool.
     """
-    folders = walk_folder(folder_path, max_depth=3)
+    try:
+        folders = walk_folder(folder_path, max_depth=1)
+    except NotADirectoryError:
+        return f"{folder_path} doesn't exist."
     return folders
 
 
