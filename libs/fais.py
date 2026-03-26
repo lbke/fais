@@ -7,8 +7,7 @@ from langchain.agents import create_agent
 
 import argparse
 
-import argcomplete
-
+from libs.contexteng.agents_md_resolver import resolve_agent_md
 from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt
 from libs.tools.planning import TOOLS as planning_tools
@@ -24,7 +23,6 @@ parser = argparse.ArgumentParser(
 
 parser.add_argument("prompt")
 parser.add_argument("files", nargs="*")
-argcomplete.autocomplete(parser)
 
 BIG_MODEL = "mistral-large-latest"
 SMALL_MODEL = "mistral-small-latest"
@@ -79,6 +77,15 @@ def validate_args(argv):
     }
 
 
+def build_context(work_dir):
+    agent_md_path, agent_md_content = resolve_agent_md(work_dir)
+    if agent_md_path is None:
+        print("No AGENTS.md found, using empty context")
+        return ""
+    print(f"AGENTS.md found at {agent_md_path}, using its content as context")
+    return agent_md_content
+
+
 def build_prompt(args: ParsedArgs):
     user_prompt = f"""
     Message de l'utilisateur:
@@ -98,15 +105,23 @@ Fichiers fournis:
 
 
 def fais(argv):
+    working_dir = os.getcwd()
     """
     [prompt, file1, file2...]
     """
     args = validate_args(argv)
     prompt = build_prompt(args)
+    context = build_context(working_dir)
+    final_prompt = f"""
+    Prompt:
+    {prompt}
+    Context:
+    {context}
+    """
 
     # @see https://forum.langchain.com/t/prevent-last-llm-call-after-tool-calls/3063
     messages = []
-    for chunk in agent.stream({"messages": prompt}):
+    for chunk in agent.stream({"messages": final_prompt}):
         if "model" in chunk:
             for msg in chunk["model"]["messages"]:
                 msg.pretty_print()
