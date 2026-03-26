@@ -2,6 +2,14 @@
 
 `fais` is a command-line LLM-based AI agent for day-to-day operations.
 
+## Features
+
+- Agents.md loading
+- Text file reading and updating
+- Docx, odt file reading and updating
+- Draft emails with Thunderbird compose CLI
+- Explore folders
+
 ## Local install
 
 For the project virtual environment:
