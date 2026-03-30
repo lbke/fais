@@ -12,6 +12,7 @@ from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
+from libs.ui.print_langchain_chunk import print_chunk
 
 ALL_TOOLS = [*document_tools, *planning_tools,
              *fileexplorer_tools, *thunderbird_tools]
@@ -122,12 +123,7 @@ def fais(argv):
     # @see https://forum.langchain.com/t/prevent-last-llm-call-after-tool-calls/3063
     messages = []
     for chunk in agent.stream({"messages": final_prompt}):
-        if "model" in chunk:
-            for msg in chunk["model"]["messages"]:
-                msg.pretty_print()
-                messages.append(msg)
-        else:
-            print(chunk)
+        print_chunk(chunk)
     return messages
 
 

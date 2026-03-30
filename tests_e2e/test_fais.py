@@ -20,3 +20,11 @@ class TestDo(unittest.TestCase):
             ["Intersection 01 mars 2026/03 mars 2026  et 02 mars 2026/05 mars 2026. Output format: DD/MM/YYYY-DD/MM/YYYY. Your answer should only output the response."])
         print(res)
         self.assertEqual(res[-1].content, "02/03/2026-03/03/2026")
+
+    def test_parallel_tools(self):
+        """
+        TODO: not finalized but should open 2 files in parallel and print results correctly
+        """
+        res = fais(
+            ["Ouvre deux fichiers en même temps"])
+        print(res)
