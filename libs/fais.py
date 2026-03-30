@@ -128,7 +128,8 @@ def fais(argv):
     # @see https://forum.langchain.com/t/prevent-last-llm-call-after-tool-calls/3063
     messages = []
     for chunk in agent.stream({"messages": final_prompt}):
-        print_chunk(chunk)
+        print(chunk)
+        #  print_chunk(chunk)
     return messages
 
 
