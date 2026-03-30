@@ -264,6 +264,7 @@ dependencies = [
     { name = "langchain" },
     { name = "langchain-mistralai" },
     { name = "langgraph-cli", extra = ["inmem"] },
+    { name = "rich" },
 ]
 
 [package.dev-dependencies]
@@ -276,6 +277,7 @@ requires-dist = [
     { name = "langchain", specifier = ">=1.2.10" },
     { name = "langchain-mistralai", specifier = ">=1.1.1" },
     { name = "langgraph-cli", extras = ["inmem"], specifier = ">=0.4.12" },
+    { name = "rich", specifier = ">=14.3.3" },
 ]
 
 [package.metadata.requires-dev]

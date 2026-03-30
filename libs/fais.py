@@ -14,6 +14,9 @@ from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
 from libs.ui.print_langchain_chunk import print_chunk
 
+from rich.console import Console
+console = Console()
+
 ALL_TOOLS = [*document_tools, *planning_tools,
              *fileexplorer_tools, *thunderbird_tools]
 
@@ -81,9 +84,11 @@ def validate_args(argv):
 def build_context(work_dir):
     agent_md_path, agent_md_content = resolve_agent_md(work_dir)
     if agent_md_path is None:
-        print("No AGENTS.md found, using empty context")
+        console.print("No AGENTS.md found, using empty context",
+                      style="magenta")
         return ""
-    print(f"AGENTS.md found at {agent_md_path}, using its content as context")
+    console.print(
+        f"AGENTS.md found at {agent_md_path}, using its content as context", style="magenta")
     return agent_md_content
 
 
@@ -128,7 +133,8 @@ def fais(argv):
 
 
 def main():
-    print(f"Running from {sys.argv[0]}")
+    console.print(
+        f"[bright_black i]Running from {sys.argv[0]}[/bright_black i]")
     fais(sys.argv[1:])
 
 
