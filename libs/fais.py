@@ -12,7 +12,8 @@ from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
-from libs.ui.print_langchain_chunk import print_chunk
+from libs.display.print_debug import print_debug
+from libs.display.print_langchain_chunk import print_chunk
 
 from rich.console import Console
 console = Console()
@@ -110,6 +111,10 @@ Fichiers fournis:
     return prompt
 
 
+def is_debug():
+    return os.getenv("DEBUG")
+
+
 def fais(argv):
     working_dir = os.getcwd()
     """
@@ -128,8 +133,9 @@ def fais(argv):
     # @see https://forum.langchain.com/t/prevent-last-llm-call-after-tool-calls/3063
     messages = []
     for chunk in agent.stream({"messages": final_prompt}):
-        print(chunk)
-        #  print_chunk(chunk)
+        print_chunk(chunk)
+        if is_debug():
+            print_debug(f"Chunk received: {chunk}")
     return messages
 
 

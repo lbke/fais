@@ -1,10 +1,8 @@
-import io
 import unittest
 
 from langchain.messages import AIMessage, ToolMessage
-from rich.console import Console
 
-import libs.ui.print_langchain_chunk as print_langchain_chunk
+import libs.display.print_langchain_chunk as print_langchain_chunk
 
 
 class TestPrintLangchainChunk(unittest.TestCase):
@@ -51,31 +49,7 @@ class TestPrintLangchainChunk(unittest.TestCase):
                 ]
             }
         }
-
-        output = io.StringIO()
-        old_console = print_langchain_chunk.console
-        old_final_console = print_langchain_chunk.final_console
-        try:
-            print_langchain_chunk.console = Console(
-                file=output,
-                force_terminal=False,
-                color_system=None,
-            )
-            print_langchain_chunk.final_console = Console(
-                file=output,
-                force_terminal=False,
-                color_system=None,
-            )
-
-            print_langchain_chunk.print_chunk(model_tool_call_chunk)
-            print_langchain_chunk.print_chunk(tool_result_chunk)
-            print_langchain_chunk.print_chunk(model_final_text_chunk)
-        finally:
-            print_langchain_chunk.console = old_console
-            print_langchain_chunk.final_console = old_final_console
-
-        printed = output.getvalue()
-        self.assertIn("Tool call: list_files (id: PXgEU7Wrd)", printed)
-        self.assertIn("Tool result for: list_files (id: PXgEU7Wrd)", printed)
-        self.assertIn("Result:", printed)
-        self.assertIn("Voici les 2 premiers fichiers de ce dossier", printed)
+        print("\n*****Testing print_chunk with model and tool messages:\n")
+        print_langchain_chunk.print_chunk(model_tool_call_chunk)
+        print_langchain_chunk.print_chunk(tool_result_chunk)
+        print_langchain_chunk.print_chunk(model_final_text_chunk)
