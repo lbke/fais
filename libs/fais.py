@@ -1,19 +1,24 @@
 import os
 import sys
+from urllib import response
+import uuid
 
 from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langchain_mistralai import ChatMistralAI
 from langchain.agents import create_agent
+from langgraph.types import Command
 
-from build.lib.libs.fais import build_prompt
-from libs.cli import parse_args
-from libs.contexteng.prompt_builder import build_context
+
+from libs.cli.parse_args import parse_args
+from libs.contexteng.prompt_builder import build_context, build_prompt
 from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt, copy_file
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
 from libs.display.print_debug import print_debug
 from libs.display.print_langchain_chunk import print_chunk
+from langgraph.checkpoint.memory import InMemorySaver
+
 
 from rich.console import Console
 console = Console()
@@ -53,10 +58,11 @@ agent = create_agent(
     middleware=[
         HumanInTheLoopMiddleware(
             interrupt_on={
-                [copy_file.__name__]: True
+                copy_file.name: True
             },
         )
-    ]
+    ],
+    checkpointer=InMemorySaver(),
 )
 
 
@@ -79,12 +85,50 @@ def fais(argv):
     {context}
     """
 
-    # @see https://forum.langchain.com/t/prevent-last-llm-call-after-tool-calls/3063
+    MAX_STREAM_STEPS = 500
+    count_stream_steps = 0
+    RUN_LOOP = True
     messages = []
-    for chunk in agent.stream({"messages": final_prompt}):
-        if is_debug():
-            print_debug(f"Chunk received: {chunk}")
-        print_chunk(chunk)
+    config = {"configurable": {"thread_id": uuid.uuid4().hex}}
+    # initial command = user prompt
+    # may be replace by "resume" commands after interrupts
+    command = {"messages": final_prompt}
+    while RUN_LOOP:
+        # Immediately break loop unless an interrupt is triggered
+        RUN_LOOP = False
+        # TODO: when rejecting a tool call, the agent may stream an interrupt again
+        # => remember rejected tool calls and prevent the interruption in this case
+        for chunk in agent.stream(command, config=config):
+            if is_debug():
+                print_debug(f"Chunk received: {chunk}")
+            print_chunk(chunk)
+            # Handle interrupts
+            if "__interrupt__" in chunk:
+                RUN_LOOP = True
+                interrupt_val = chunk["__interrupt__"][0].value
+                print_debug(interrupt_val)
+                decisions = []
+                for action in interrupt_val["action_requests"]:
+                    # NOTE: zipping could work but not sure if order is guaranteed
+                    review_config = next(rc for rc in
+                                         interrupt_val["review_configs"] if rc["action_name"] == action["name"])
+                    # TODO: loading readline could help?
+                    response = console.input(
+                        f"Interrupt received for action {action['name']} with config {review_config}. Answer?")
+                    decision = {"type": response}
+                    # TODO: not finalized
+                    if response == "edit":
+                        decision["edited_action"] = console.input(
+                            "Proposed edit?")
+                    decisions.append(decision)
+                command = Command(resume={"decisions": decisions})
+
+            # Prevent running too many steps
+            count_stream_steps += 1
+            if count_stream_steps > MAX_STREAM_STEPS:
+                print_debug(
+                    f"Maximum number of stream steps ({MAX_STREAM_STEPS}) reached, stopping the stream to prevent infinite loop.")
+                break
     return messages
 
 

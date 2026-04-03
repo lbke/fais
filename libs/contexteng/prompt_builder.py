@@ -1,4 +1,4 @@
-from build.lib.libs.fais import ParsedArgs
+from libs.cli.parse_args import ParsedArgs
 from libs.contexteng.agents_md_resolver import resolve_agent_md
 from libs.display.print_info import print_info
 
