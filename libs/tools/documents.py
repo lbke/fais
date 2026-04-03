@@ -1,5 +1,6 @@
 from os import path
 from shutil import copy
+from typing import Final, TypedDict
 
 from langchain.tools import tool
 
@@ -78,6 +79,9 @@ def update_document_with_xml(filepath: str, new_xml_content: str) -> str:
 
 TOOLS = [copy_file, read_text_file, read_document_file_text_content,
          open_document_file_as_xml, update_document_with_xml]
+
+test = Final({"foo": "bar"})
+test[""]
 
 # Explains the relationship between tools
 TOOLS_PROMPT = f"""

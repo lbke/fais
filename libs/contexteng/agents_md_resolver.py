@@ -7,6 +7,8 @@ import os
 
 def resolve_agent_md(working_directory: str) -> tuple[str, str] | tuple[None, None]:
     """
+        Find the closest AGENTS.md file starting from working directory
+        (where fais was called from terminal)
         - Check if above home folder, early fail otherwise
         - Look for AGENTS.md file in current folder, then below etc. until home folder
         - If found, return its content, else return None
