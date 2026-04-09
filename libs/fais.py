@@ -7,6 +7,7 @@ from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langchain_mistralai import ChatMistralAI
 from langchain.agents import create_agent
 from langgraph.types import Command
+from rich.prompt import Prompt
 
 
 from libs.cli.parse_args import parse_args
@@ -101,7 +102,6 @@ def fais(argv):
         for chunk in agent.stream(command, config=config):
             if is_debug():
                 print_debug(f"Chunk received: {chunk}")
-            print_chunk(chunk)
             # Handle interrupts
             if "__interrupt__" in chunk:
                 RUN_LOOP = True
@@ -113,8 +113,8 @@ def fais(argv):
                     review_config = next(rc for rc in
                                          interrupt_val["review_configs"] if rc["action_name"] == action["name"])
                     # TODO: loading readline could help?
-                    response = console.input(
-                        f"Interrupt received for action {action['name']} with config {review_config}. Answer?")
+                    response = Prompt.ask(
+                        f"Interrupt received for action {action['name']}({action['args']}).", choices=review_config["allowed_decisions"])
                     decision = {"type": response}
                     # TODO: not finalized
                     if response == "edit":
