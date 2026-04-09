@@ -99,6 +99,7 @@ def fais(argv):
         RUN_LOOP = False
         # TODO: when rejecting a tool call, the agent may stream an interrupt again
         # => remember rejected tool calls and prevent the interruption in this case
+        # TODO: switch to v2 https://forum.langchain.com/t/typing-of-streamed-chunks/3356
         for chunk in agent.stream(command, config=config):
             if is_debug():
                 print_debug(f"Chunk received: {chunk}")
@@ -112,7 +113,8 @@ def fais(argv):
                     # NOTE: zipping could work but not sure if order is guaranteed
                     review_config = next(rc for rc in
                                          interrupt_val["review_configs"] if rc["action_name"] == action["name"])
-                    # TODO: loading readline could help?
+                    # TODO: Prompt.ask is just a wrapper around the basic input,
+                    # find a way a to get a proper list input for better UX
                     response = Prompt.ask(
                         f"Interrupt received for action {action['name']}({action['args']}).", choices=review_config["allowed_decisions"])
                     decision = {"type": response}

@@ -12,8 +12,18 @@ from langchain.tools import tool
 # (Pydantic would require clumsy JSON syntax ; TypedDict doesn't support methods)
 @dataclass
 class EmailContent:
+    """
+    Do NOT use emojis.
+    """
     subject: str
     to: str
+    """
+    Body should be written in plain text, with HTML for links if needed.
+    Never generate new links that may not exist.
+    Do NOT use markdown syntax for links.
+    Do NOT use emojis.
+    Do NOT add a signature, as it will already be present in the user's Thunderbird configuration.
+    """
     body: str
     """ Must be an absolute path"""
     attachment: Optional[str] = None  # default value matters even when using Optional with dataclass
