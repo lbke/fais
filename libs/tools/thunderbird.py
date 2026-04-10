@@ -10,6 +10,8 @@ from langchain.tools import tool
 
 # dataclass is the best way to get schema + custom methods
 # (Pydantic would require clumsy JSON syntax ; TypedDict doesn't support methods)
+# Note: Thunderbird has a terrible link editing experience, feature request here:
+# https://connect.mozilla.org/t5/ideas/add-option-to-make-links-clickable-when-composing-a-message/idi-p/109126#feedback-success
 @dataclass
 class EmailContent:
     """
@@ -18,10 +20,15 @@ class EmailContent:
     subject: str
     to: str
     """
-    Body should be written in plain text, with HTML for links if needed.
-    Never generate new links that may not exist.
-    Do NOT use markdown syntax for links.
+    Body should be written in plain text. 
+    ## Links, URLs
+    - Links should be included in plain text, not markdown or HTML.
+    - Never generate links that may not exist.
+    - If you think a link must be added but you don't have the information to do so, write a placeholder like [LINK THAT SHOULD POINT TO AN HELP PAGE ABOUT {TOPIC}] instead of inventing a fake link.
+    - Do NOT use markdown syntax for links.
+    ## Emojis
     Do NOT use emojis.
+    ## Signature
     Do NOT add a signature, as it will already be present in the user's Thunderbird configuration.
     """
     body: str
