@@ -1,8 +1,8 @@
 import os
 import sys
-from urllib import response
 import uuid
 
+from httpx import HTTPStatusError
 from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langchain_mistralai import ChatMistralAI
 from langchain.agents import create_agent
@@ -100,37 +100,44 @@ def fais(argv):
         # TODO: when rejecting a tool call, the agent may stream an interrupt again
         # => remember rejected tool calls and prevent the interruption in this case
         # TODO: switch to v2 https://forum.langchain.com/t/typing-of-streamed-chunks/3356
-        for chunk in agent.stream(command, config=config):
-            if is_debug():
-                print_debug(f"Chunk received: {chunk}")
-            # Handle interrupts
-            if "__interrupt__" in chunk:
-                RUN_LOOP = True
-                interrupt_val = chunk["__interrupt__"][0].value
-                print_debug(interrupt_val)
-                decisions = []
-                for action in interrupt_val["action_requests"]:
-                    # NOTE: zipping could work but not sure if order is guaranteed
-                    review_config = next(rc for rc in
-                                         interrupt_val["review_configs"] if rc["action_name"] == action["name"])
-                    # TODO: Prompt.ask is just a wrapper around the basic input,
-                    # find a way a to get a proper list input for better UX
-                    response = Prompt.ask(
-                        f"Interrupt received for action {action['name']}({action['args']}).", choices=review_config["allowed_decisions"])
-                    decision = {"type": response}
-                    # TODO: not finalized
-                    if response == "edit":
-                        decision["edited_action"] = console.input(
-                            "Proposed edit?")
-                    decisions.append(decision)
-                command = Command(resume={"decisions": decisions})
+        try:
+            for chunk in agent.stream(command, config=config):
+                if is_debug():
+                    print_debug(f"Chunk received: {chunk}")
+                # Handle interrupts
+                if "__interrupt__" in chunk:
+                    RUN_LOOP = True
+                    interrupt_val = chunk["__interrupt__"][0].value
+                    print_debug(interrupt_val)
+                    decisions = []
+                    for action in interrupt_val["action_requests"]:
+                        # NOTE: zipping could work but not sure if order is guaranteed
+                        review_config = next(rc for rc in
+                                             interrupt_val["review_configs"] if rc["action_name"] == action["name"])
+                        # TODO: Prompt.ask is just a wrapper around the basic input,
+                        # find a way a to get a proper list input for better UX
+                        response = Prompt.ask(
+                            f"Interrupt received for action {action['name']}({action['args']}).", choices=review_config["allowed_decisions"])
+                        decision = {"type": response}
+                        # TODO: not finalized
+                        if response == "edit":
+                            decision["edited_action"] = console.input(
+                                "Proposed edit?")
+                        decisions.append(decision)
+                    command = Command(resume={"decisions": decisions})
 
-            # Prevent running too many steps
-            count_stream_steps += 1
-            if count_stream_steps > MAX_STREAM_STEPS:
+                # Prevent running too many steps
+                count_stream_steps += 1
+                if count_stream_steps > MAX_STREAM_STEPS:
+                    print_debug(
+                        f"Maximum number of stream steps ({MAX_STREAM_STEPS}) reached, stopping the stream to prevent infinite loop.")
+                    break
+        except HTTPStatusError as e:
+            if e.response.status_code == 401:
                 print_debug(
-                    f"Maximum number of stream steps ({MAX_STREAM_STEPS}) reached, stopping the stream to prevent infinite loop.")
-                break
+                    "Unauthorized error during agent execution. This may be due to an invalid API key.")
+            print_debug(f"HTTP error during agent execution: {e}")
+
     return messages
 
 
