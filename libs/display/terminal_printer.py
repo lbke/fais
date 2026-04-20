@@ -57,9 +57,14 @@ class TerminalEventPrinter():
             self.print_model_data(data)
         elif "tools" in data:
             self.print_tool_data(data)
+        elif "__interrupt__" in data:
+            # Handled outside of printing
+            pass
         elif "HumanInTheLoopMiddleware.after_model" in data:
             pass
         else:
+            # For now we print unexpected chunks to see how the stream goes,
+            # given that typing is awful
             console.print(PREFIX, "Chunk")
             console.print(chunk)
 
