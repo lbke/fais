@@ -10,6 +10,7 @@
 - Draft emails with Thunderbird compose CLI
 - Explore folders
 
+
 ## Local install
 
 For the project virtual environment:
@@ -44,18 +45,21 @@ uv tool update-shell
 fais "prompt" ./file1 ./file2
 ```
 
-## Technologies
+## Main technologies and dependencies
 
 - LangChain for the agent loop
 - uv for setup
 - Good old code, limited use of AI except for debugging annoying errors
+- rich for proper text display (inspired by Mistral Vibe use of textualize)
+- prompt_toolkit for handling human-in-the-loop interaction (inspired by questionary)
 
 ## References and docs
 
 - https://setuptools.pypa.io/
 - https://docs.langchain.com/
 - https://docs.astral.sh/
-
+- https://python-prompt-toolkit.readthedocs.io/
+- https://rich.readthedocs.io/en/latest/
 
 ## About
 

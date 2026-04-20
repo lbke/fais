@@ -2,7 +2,7 @@ import unittest
 
 from langchain.messages import AIMessage, ToolMessage
 
-import libs.display.print_langchain_chunk as print_langchain_chunk
+from libs.display.terminal_printer import tp
 
 
 class TestPrintLangchainChunk(unittest.TestCase):
@@ -50,6 +50,6 @@ class TestPrintLangchainChunk(unittest.TestCase):
             }
         }
         print("\n*****Testing print_chunk with model and tool messages:\n")
-        print_langchain_chunk.print_chunk(model_tool_call_chunk)
-        print_langchain_chunk.print_chunk(tool_result_chunk)
-        print_langchain_chunk.print_chunk(model_final_text_chunk)
+        tp.print_langchain_chunk.print_chunk(model_tool_call_chunk)
+        tp.print_langchain_chunk.print_chunk(tool_result_chunk)
+        tp.print_langchain_chunk.print_chunk(model_final_text_chunk)

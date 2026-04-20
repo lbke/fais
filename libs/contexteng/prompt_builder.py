@@ -1,14 +1,14 @@
 from libs.cli.parse_args import ParsedArgs
 from libs.contexteng.agents_md_resolver import resolve_agent_md
-from libs.display.print_info import print_info
+from libs.display.terminal_printer import tp
 
 
 def build_context(work_dir):
     agent_md_path, agent_md_content = resolve_agent_md(work_dir)
     if agent_md_path is None:
-        print_info("No AGENTS.md found, using empty context")
+        tp.print_info("No AGENTS.md found, using empty context")
         return ""
-    print_info(
+    tp.print_info(
         f"AGENTS.md found at {agent_md_path}, using its content as context")
     return agent_md_content
 

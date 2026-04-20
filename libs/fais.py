@@ -6,8 +6,9 @@ from httpx import HTTPStatusError
 from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langchain_mistralai import ChatMistralAI
 from langchain.agents import create_agent
-from langgraph.types import Command
-from rich.prompt import Prompt
+from langgraph.types import Command, StreamPart
+from prompt_toolkit.shortcuts import choice
+from prompt_toolkit.filters import is_done
 
 
 from libs.cli.parse_args import parse_args
@@ -16,13 +17,13 @@ from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt, copy_file
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
-from libs.display.print_debug import print_debug
-from libs.display.print_langchain_chunk import print_chunk
+from libs.display.terminal_printer import tp
 from langgraph.checkpoint.memory import InMemorySaver
 
 
 from rich.console import Console
 console = Console()
+
 
 ALL_TOOLS = [*document_tools, *planning_tools,
              *fileexplorer_tools, *thunderbird_tools]
@@ -89,7 +90,6 @@ def fais(argv):
     MAX_STREAM_STEPS = 500
     count_stream_steps = 0
     RUN_LOOP = True
-    messages = []
     config = {"configurable": {"thread_id": uuid.uuid4().hex}}
     # initial command = user prompt
     # may be replace by "resume" commands after interrupts
@@ -99,46 +99,50 @@ def fais(argv):
         RUN_LOOP = False
         # TODO: when rejecting a tool call, the agent may stream an interrupt again
         # => remember rejected tool calls and prevent the interruption in this case
-        # TODO: switch to v2 https://forum.langchain.com/t/typing-of-streamed-chunks/3356
         try:
-            for chunk in agent.stream(command, config=config):
+            # FIXME : type inference is wrong, and using "StreamPart" from "langgraph.types" doesn't work
+            # since it lacks the proper generic type for data (using AgentState)
+            # so not typing for chunks for now...
+            for chunk in agent.stream(command, config=config, version='v2'):
                 if is_debug():
-                    print_debug(f"Chunk received: {chunk}")
-                # Handle interrupts
-                if "__interrupt__" in chunk:
+                    tp.print_debug(f"Chunk received: {chunk}")
+                tp.print_chunk(chunk)
+                if chunk["type"] == "updates" and chunk["data"].get("__interrupt__"):
                     RUN_LOOP = True
-                    interrupt_val = chunk["__interrupt__"][0].value
-                    print_debug(interrupt_val)
+                    # Interrupt values are still untyped
+                    interrupt_val = chunk["data"]["__interrupt__"][0].value
+                    if is_debug():
+                        tp.print_debug(interrupt_val)
                     decisions = []
                     for action in interrupt_val["action_requests"]:
                         # NOTE: zipping could work but not sure if order is guaranteed
                         review_config = next(rc for rc in
                                              interrupt_val["review_configs"] if rc["action_name"] == action["name"])
-                        # TODO: Prompt.ask is just a wrapper around the basic input,
-                        # find a way a to get a proper list input for better UX
-                        response = Prompt.ask(
-                            f"Interrupt received for action {action['name']}({action['args']}).", choices=review_config["allowed_decisions"])
+                        # https://python-prompt-toolkit.readthedocs.io/en/stable/pages/asking_for_a_choice.html
+                        # (value, message)
+                        options = [(o, o)
+                                   for o in review_config["allowed_decisions"]]
+                        response = choice(
+                            message=f"Interrupt received for action {action['name']}({action['args']}).", show_frame=~is_done, options=options)
                         decision = {"type": response}
-                        # TODO: not finalized
+                        # TODO: not finalized, need to
                         if response == "edit":
                             decision["edited_action"] = console.input(
                                 "Proposed edit?")
                         decisions.append(decision)
                     command = Command(resume={"decisions": decisions})
-
                 # Prevent running too many steps
                 count_stream_steps += 1
                 if count_stream_steps > MAX_STREAM_STEPS:
-                    print_debug(
+                    tp.print_debug(
                         f"Maximum number of stream steps ({MAX_STREAM_STEPS}) reached, stopping the stream to prevent infinite loop.")
                     break
         except HTTPStatusError as e:
             if e.response.status_code == 401:
-                print_debug(
+                tp.print_debug(
                     "Unauthorized error during agent execution. This may be due to an invalid API key.")
-            print_debug(f"HTTP error during agent execution: {e}")
-
-    return messages
+            tp.print_debug(f"HTTP error during agent execution: {e}")
+    return agent.get_state(config).values["messages"]
 
 
 def main():

@@ -5,9 +5,10 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
-    "langchain>=1.2.10",
+    "langchain==1.2.15",
     "langchain-mistralai>=1.1.1",
     "langgraph-cli[inmem]>=0.4.12",
+    "prompt-toolkit>=3.0.52",
     "rich>=14.3.3",
 ]
 
