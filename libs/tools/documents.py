@@ -1,13 +1,30 @@
+from functools import wraps
 from os import path
 from shutil import copy
 
 from langchain.tools import tool
+from langchain_core.callbacks import file
 
 from libs.utils import xmlzip
 from xml.etree import ElementTree
 
 
+def fileopenertool(func):
+    """
+    Catches file not found error to inform the model rather than failing,
+    as hallucinating a file is very common but can be caught by the model
+    """
+    @wraps(func)
+    def safeopen(*args, **kwargs):
+        try:
+            return func(*args, **kwargs)
+        except FileNotFoundError as err:
+            return f"Warning: {err}"
+    return safeopen
+
+
 @tool
+@fileopenertool
 def copy_file(filepath: str, new_directory_or_filepath: str):
     """
     Copy a file to a new location
@@ -15,11 +32,8 @@ def copy_file(filepath: str, new_directory_or_filepath: str):
     The new path can also be a file, in which case the new file has a different name
     Use this tool to create new files from a template
     """
-    try:
-        copy(filepath, new_directory_or_filepath)
-        return f"Success: copied {filepath} to {new_directory_or_filepath}"
-    except FileNotFoundError as err:
-        return f"Warning: {err}"
+    copy(filepath, new_directory_or_filepath)
+    return f"Success: copied {filepath} to {new_directory_or_filepath}"
 
 
 @tool
@@ -45,6 +59,7 @@ def read_text_file(filepath: str) -> str:
 
 
 @tool
+@fileopenertool
 def read_document_file_text_content(filepath: str) -> str:
     """
     Use to open .docx or .odt documents
@@ -52,10 +67,14 @@ def read_document_file_text_content(filepath: str) -> str:
     Returns the file's main text content, in pure text
     This function loses the XML structure of the document (not suited for later updates)
     """
-    xml = xmlzip.extract_content_xml_from_zip(filepath)
-    root = ElementTree.fromstring(xml)
-    text_chunks = [chunk.strip() for chunk in root.itertext()
-                   if chunk and chunk.strip()]
+    try:
+        xml = xmlzip.extract_content_xml_from_zip(filepath)
+        root = ElementTree.fromstring(xml)
+        text_chunks = [chunk.strip() for chunk in root.itertext()
+                       if chunk and chunk.strip()]
+    except FileNotFoundError as err:
+        return f"Warning: {err}"
+
     return " ".join(text_chunks)
 
 

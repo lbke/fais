@@ -16,6 +16,12 @@ class TestDocumentsTools(unittest.TestCase):
         # No XML left
         self.assertFalse(content.find("<") > -1)
 
+    def test_read_document_file_text_content_not_exist(self):
+        filepath = path.join(assets_dir, "does_not_exist")
+        content = read_document_file_text_content.invoke(filepath)
+        self.assertTrue(content.startswith("Warning"))
+
+    # Copyfile
     def test_copyfile_dst_does_not_exist(self):
         not_exist_dir = path.join(assets_dir, "does_not_exist")
         copy_res = copy_file.invoke(

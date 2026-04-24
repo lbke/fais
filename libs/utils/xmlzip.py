@@ -5,6 +5,8 @@ import tempfile
 from os import path
 from zipfile import ZipFile
 
+from click import File
+
 
 """
 Handles zipped xml file types such as docx, odt
@@ -47,8 +49,12 @@ def extract_content_xml_from_zip(file_path: str) -> str:
             content_file = _get_zip_content_file_name(file_path)
             content_xml = zf.read(content_file).decode('utf-8')
             return content_xml
+    except FileNotFoundError as err:
+        # File not found are handled at tool level
+        raise err
     except Exception as e:
-        raise RuntimeError(f"Failed to extract text from ODT: {str(e)}")
+        raise RuntimeError(
+            f"Failed to extract text from ODT: {type(e)} {str(e)}")
 
 # NOTE: it's not possible to update the content of a single zip file
 # as any change will affect the zip structure, index, offset
