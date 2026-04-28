@@ -17,6 +17,7 @@ from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt, copy_file
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
+from libs.tools.internet import TOOLS as internet_tools
 from libs.display.terminal_printer import tp
 from langgraph.checkpoint.memory import InMemorySaver
 
@@ -26,7 +27,7 @@ console = Console()
 
 
 ALL_TOOLS = [*document_tools, *planning_tools,
-             *fileexplorer_tools, *thunderbird_tools]
+             *fileexplorer_tools, *thunderbird_tools, *internet_tools]
 
 
 BIG_MODEL = "mistral-large-latest"
