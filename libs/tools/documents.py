@@ -1,6 +1,7 @@
 from functools import wraps
 from os import path
 from shutil import copy
+from zipfile import BadZipFile
 
 from langchain.tools import tool
 from langchain_core.callbacks import file
@@ -20,6 +21,8 @@ def fileopenertool(func):
             return func(*args, **kwargs)
         except FileNotFoundError as err:
             return f"Warning: {err}"
+        except BadZipFile as err:
+            return f"Error: Failed to open zip file: {str(err)}"
     return safeopen
 
 
@@ -41,6 +44,10 @@ def open_document_file_as_xml(filepath: str) -> str:
     """
     Use to open .docx or .odt documents
     (Microsoft Word, Libre Office files).
+
+    Do not use for other types of files such as PDF,
+    since they are not zipped XML files.
+
     Returns the file's main text content, structured in XML
     The XML can be edited to create a new file, as long as the structure is respected.
     """

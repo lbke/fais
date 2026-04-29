@@ -3,10 +3,7 @@ from shutil import move
 import tempfile
 
 from os import path
-from zipfile import ZipFile
-
-from click import File
-
+from zipfile import BadZipFile, ZipFile
 
 """
 Handles zipped xml file types such as docx, odt
@@ -52,9 +49,12 @@ def extract_content_xml_from_zip(file_path: str) -> str:
     except FileNotFoundError as err:
         # File not found are handled at tool level
         raise err
+    except BadZipFile as err:
+        raise BadZipFile(
+            f"File {file_path} is not a zip file, it can't be opened as such: {str(err)}")
     except Exception as e:
         raise RuntimeError(
-            f"Failed to extract text from ODT: {type(e)} {str(e)}")
+            f"Failed to extract text from ODT or DOCX file {file_path}: {type(e)} {str(e)}")
 
 # NOTE: it's not possible to update the content of a single zip file
 # as any change will affect the zip structure, index, offset
