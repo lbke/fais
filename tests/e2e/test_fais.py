@@ -4,7 +4,7 @@ from libs.fais import fais
 from libs.utils import xmlzip
 
 
-class TestDo(unittest.TestCase):
+class TestFais(unittest.TestCase):
     def test_changefile(self):
         fixture = path.join(path.dirname(__file__), "./assets/champ.docx")
         print(fixture)
@@ -27,4 +27,8 @@ class TestDo(unittest.TestCase):
         """
         res = fais(
             ["Ouvre deux fichiers en même temps"])
+        print(res)
+
+    def test_errors(self):
+        res = fais("Ouvre le fichier ./fake-test.txt")
         print(res)

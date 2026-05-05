@@ -13,6 +13,7 @@ from prompt_toolkit.filters import is_done
 
 from libs.cli.parse_args import parse_args
 from libs.contexteng.prompt_builder import build_context, build_prompt
+from libs.middlewares.handle_file_errors import HandleFileErrorsMiddleware
 from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt, copy_file
 from libs.tools.planning import TOOLS as planning_tools
@@ -59,6 +60,7 @@ agent = create_agent(
         *ALL_TOOLS
     ],
     middleware=[
+        HandleFileErrorsMiddleware,
         HumanInTheLoopMiddleware(
             interrupt_on={
                 copy_file.name: True

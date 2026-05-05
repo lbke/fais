@@ -17,10 +17,7 @@ def list_subfolders(folder_path: str, depth: int) -> list[str]:
     If you need to explore a specific folder, call this tool again with a nested folder_path.
     To read the files for a folder, use `list_files` tool.
     """
-    try:
-        folders = walk_folder(folder_path, max_depth=1)
-    except NotADirectoryError:
-        return f"{folder_path} doesn't exist."
+    folders = walk_folder(folder_path, max_depth=1)
     return folders
 
 

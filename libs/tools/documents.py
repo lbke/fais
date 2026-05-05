@@ -1,33 +1,14 @@
 from functools import wraps
 from os import path
 from shutil import copy
-from zipfile import BadZipFile
 
 from langchain.tools import tool
-from langchain_core.callbacks import file
 
 from libs.utils import xmlzip
 from xml.etree import ElementTree
 
 
-def fileopenertool(func):
-    """
-    Catches file not found error to inform the model rather than failing,
-    as hallucinating a file is very common but can be caught by the model
-    """
-    @wraps(func)
-    def safeopen(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except FileNotFoundError as err:
-            return f"Warning: {err}"
-        except BadZipFile as err:
-            return f"Error: Failed to open zip file: {str(err)}"
-    return safeopen
-
-
 @tool
-@fileopenertool
 def copy_file(filepath: str, new_directory_or_filepath: str):
     """
     Copy a file to a new location
@@ -66,7 +47,6 @@ def read_text_file(filepath: str) -> str:
 
 
 @tool
-@fileopenertool
 def read_document_file_text_content(filepath: str) -> str:
     """
     Use to open .docx or .odt documents
@@ -74,13 +54,10 @@ def read_document_file_text_content(filepath: str) -> str:
     Returns the file's main text content, in pure text
     This function loses the XML structure of the document (not suited for later updates)
     """
-    try:
-        xml = xmlzip.extract_content_xml_from_zip(filepath)
-        root = ElementTree.fromstring(xml)
-        text_chunks = [chunk.strip() for chunk in root.itertext()
-                       if chunk and chunk.strip()]
-    except FileNotFoundError as err:
-        return f"Warning: {err}"
+    xml = xmlzip.extract_content_xml_from_zip(filepath)
+    root = ElementTree.fromstring(xml)
+    text_chunks = [chunk.strip() for chunk in root.itertext()
+                   if chunk and chunk.strip()]
 
     return " ".join(text_chunks)
 
