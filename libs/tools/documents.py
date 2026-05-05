@@ -68,7 +68,8 @@ def update_document_with_xml(filepath: str, new_xml_content: str) -> str:
     Updates a document
     Returns the updated document path if succesful
     """
-    # Until we figure a rollback mechanism, this will never actually update the document,
+    # Until we figure a rollback mechanism and better XML edits,
+    # this will not actually update the document,
     # in order to avoid data loss,
     # but instead generate an updated copy of the document
     filename, ext = path.splitext(filepath)

@@ -15,7 +15,7 @@ def HandleFileErrorsMiddleware(request, handler):
     For more exotic exception, use specialized middlewares
     """
     try:
-        handler(request)
+        return handler(request)
     except (FileNotFoundError, NotADirectoryError, BadZipFile) as err:
         # Accourding to documentation, tool exception doesn't stop an agent from running
         # FIXME: this doesn't work as expected, the ToolException is not caught by the agent
