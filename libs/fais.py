@@ -15,7 +15,8 @@ from libs.cli.parse_args import parse_args
 from libs.contexteng.prompt_builder import build_context, build_prompt
 from libs.middlewares.handle_file_errors import HandleFileErrorsMiddleware
 from libs.tools.thunderbird import TOOLS as thunderbird_tools
-from libs.tools.documents import TOOLS as document_tools, TOOLS_PROMPT as document_tools_prompt, copy_file
+from libs.tools.filemanager import TOOLS as filemanager_tools, copy_file
+from libs.tools.documents import TOOLS as document_tools
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
 from libs.tools.internet import TOOLS as internet_tools
@@ -28,7 +29,7 @@ console = Console()
 
 
 ALL_TOOLS = [*document_tools, *planning_tools,
-             *fileexplorer_tools, *thunderbird_tools, *internet_tools]
+             *fileexplorer_tools, *filemanager_tools, *thunderbird_tools, *internet_tools]
 
 
 BIG_MODEL = "mistral-large-latest"

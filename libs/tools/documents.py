@@ -1,4 +1,3 @@
-from functools import wraps
 from os import path
 from shutil import copy
 
@@ -6,18 +5,6 @@ from langchain.tools import tool
 
 from libs.utils import xmlzip
 from xml.etree import ElementTree
-
-
-@tool
-def copy_file(filepath: str, new_directory_or_filepath: str):
-    """
-    Copy a file to a new location
-    The new path can be a directory, in which case the new file has the same name as the previous one
-    The new path can also be a file, in which case the new file has a different name
-    Use this tool to create new files from a template
-    """
-    copy(filepath, new_directory_or_filepath)
-    return f"Success: copied {filepath} to {new_directory_or_filepath}"
 
 
 @tool
@@ -80,7 +67,7 @@ def update_document_with_xml(filepath: str, new_xml_content: str) -> str:
     return copyfilepath
 
 
-TOOLS = [copy_file, read_text_file, read_document_file_text_content,
+TOOLS = [read_text_file, read_document_file_text_content,
          open_document_file_as_xml, update_document_with_xml]
 
 # Explains the relationship between tools
