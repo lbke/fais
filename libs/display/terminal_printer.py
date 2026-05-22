@@ -31,7 +31,7 @@ class TerminalEventPrinter():
                     PREFIX, f"Tool call: {tc["name"]} (id: {tc["id"]})")
                 console.print(PREFIX, f"Args: {tc["args"]}")
         else:
-            console.print(PREFIX, f"Fais dis:", style="bold")
+            console.print(PREFIX, f"Fais dit :", style="bold")
             final_console.print(f"{msg.content}", style="bright_white")
 
     def print_tool_data(self, data):
