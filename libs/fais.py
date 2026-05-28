@@ -14,7 +14,7 @@ from prompt_toolkit.filters import is_done
 
 from libs.cli.parse_args import parse_args
 from libs.contexteng.prompt_builder import build_context, build_prompt
-from libs.contexteng.skills_resolver import discover_skills, load_skills
+from libs.contexteng.skills_resolver import discover_skills, load_skills, resolve_skills_folder
 from libs.middlewares.handle_file_errors import HandleFileErrorsMiddleware
 from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.filemanager import TOOLS as filemanager_tools, copy_file
@@ -91,7 +91,18 @@ def fais(argv):
     args = parse_args(argv)
     prompt = build_prompt(args)
     context = build_context(working_dir)
-    (skills_info, skills_location) = discover_skills(working_dir)
+
+    skills_info = []
+    skills_location = {}
+    skills_folder = resolve_skills_folder(working_dir)
+    if skills_folder is None:
+        tp.print_info("No .agents/skills found, using empty context")
+    else:
+        tp.print_info(
+            f".agents/skills found at {skills_folder}")
+        (skills_info, skills_location) = discover_skills(skills_folder)
+        tp.print_info(f"Skills discovered: {skills_info}")
+
     final_prompt = f"""
     Prompt:
     {prompt}
