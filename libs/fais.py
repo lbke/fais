@@ -1,5 +1,6 @@
 import os
 import sys
+from typing import TypedDict
 import uuid
 
 from httpx import HTTPStatusError
@@ -13,6 +14,7 @@ from prompt_toolkit.filters import is_done
 
 from libs.cli.parse_args import parse_args
 from libs.contexteng.prompt_builder import build_context, build_prompt
+from libs.contexteng.skills_resolver import discover_skills, load_skills
 from libs.middlewares.handle_file_errors import HandleFileErrorsMiddleware
 from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.filemanager import TOOLS as filemanager_tools, copy_file
@@ -29,7 +31,7 @@ console = Console()
 
 
 ALL_TOOLS = [*document_tools, *planning_tools,
-             *fileexplorer_tools, *filemanager_tools, *thunderbird_tools, *internet_tools]
+             *fileexplorer_tools, *filemanager_tools, *thunderbird_tools, *internet_tools, load_skills]
 
 
 BIG_MODEL = "mistral-large-latest"
@@ -37,6 +39,10 @@ SMALL_MODEL = "mistral-small-latest"
 model = ChatMistralAI(
     model_name=SMALL_MODEL
 )
+
+
+class ContextSchema(TypedDict):
+    skills_location: list[str, str]
 
 
 agent = create_agent(
@@ -69,6 +75,7 @@ agent = create_agent(
         )
     ],
     checkpointer=InMemorySaver(),
+    context_schema=ContextSchema
 )
 
 
@@ -84,17 +91,21 @@ def fais(argv):
     args = parse_args(argv)
     prompt = build_prompt(args)
     context = build_context(working_dir)
+    (skills_info, skills_location) = discover_skills(working_dir)
     final_prompt = f"""
     Prompt:
     {prompt}
     Context:
     {context}
+    Available skills:
+    {skills_info}
     """
 
     MAX_STREAM_STEPS = 500
     count_stream_steps = 0
     RUN_LOOP = True
     config = {"configurable": {"thread_id": uuid.uuid4().hex}}
+    context: ContextSchema = {"skills_location": skills_location}
     # initial command = user prompt
     # may be replace by "resume" commands after interrupts
     command = {"messages": final_prompt}
@@ -107,7 +118,7 @@ def fais(argv):
             # FIXME : type inference is wrong, and using "StreamPart" from "langgraph.types" doesn't work
             # since it lacks the proper generic type for data (using AgentState)
             # so not typing for chunks for now...
-            for chunk in agent.stream(command, config=config, version='v2'):
+            for chunk in agent.stream(command, config=config, version='v2', context=context):
                 if is_debug():
                     tp.print_debug(f"Chunk received: {chunk}")
                 tp.print_chunk(chunk)

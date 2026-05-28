@@ -4,6 +4,8 @@ https://agents.md/
 
 import os
 
+from libs.contexteng.folder_or_file_resolver import validate_working_directory
+
 
 def resolve_agent_md(working_directory: str) -> tuple[str, str] | tuple[None, None]:
     """
@@ -20,22 +22,8 @@ def resolve_agent_md(working_directory: str) -> tuple[str, str] | tuple[None, No
 
         Returns the AGENTS.md file path and content
     """
-    # Not a dir
-    if not os.path.isdir(working_directory):
-        raise ValueError(f"{working_directory} is not a valid directory")
-    # Be above home
-    # TODO: reliability to be double checked
-    tilde = "~"
-    home_folder = os.path.expanduser(tilde)
-    if home_folder == tilde:
-        raise ValueError(
-            "Home folder is not defined, cannot resolve AGENTS.md")
-    abs_current_folder = os.path.abspath(working_directory)
-    if not abs_current_folder.startswith(home_folder):
-        raise ValueError(
-            "Current folder is above home folder, cannot resolve AGENTS.md")
-
-    folder = abs_current_folder
+    (wd_abs_path, home_folder) = validate_working_directory(working_directory)
+    folder = wd_abs_path
     while True:
         agents_md_path = os.path.join(folder, "AGENTS.md")
         if os.path.isfile(agents_md_path):
