@@ -1,7 +1,7 @@
 from os import path
 import unittest
 
-from libs.tools.documents import copy_file, read_document_file_text_content
+from libs.tools.documents import read_document_file_text_content
 
 
 local_dir = path.dirname(__file__)
