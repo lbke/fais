@@ -27,6 +27,7 @@ import yaml
 from libs.contexteng.folder_or_file_resolver import validate_working_directory
 
 from pydantic import BaseModel, Field
+from libs.display.terminal_printer import tp
 
 
 def resolve_skills_folder(working_directory: str) -> tuple[str, str] | tuple[None, None]:
@@ -61,6 +62,7 @@ def resolve_skills_folder(working_directory: str) -> tuple[str, str] | tuple[Non
 class SkillInfo(BaseModel):
     """
     Represents a skill with its name and description
+    Data structure ready to be fed to an LLM
     We stick to standard for length limitation and available fields
     https://agentskills.io/home
     """
@@ -68,27 +70,25 @@ class SkillInfo(BaseModel):
     description: str = Field(max_length=1024)
 
 
-def discover_skills(skills_folder: str) -> tuple[list[SkillInfo], dict[str, str]]:
+def _discover_standard_skills(skills_folder: str) -> list[tuple[SkillInfo, str]]:
     """
-    Discover SKILL.md files in the provided skill folder
-
-    Expects unique skill names for now
-
-    Returns list of skill info for the LLM + map of skill name and location
+    Discovers .agents/skills/skill-name/SKILL.md
     """
-    skill_files = glob.glob(os.path.join(skills_folder, "**/SKILL.md"))
-    skills_info = []
-    skills_location = {}
+    skill_files = glob.glob(os.path.join(skills_folder, "*/SKILL.md"))
+    discovered_skills: list[tuple[SkillInfo, str]] = []
     skill_names = set({})
     for skill_file in skill_files:
         with open(skill_file, "r") as f:
             try:
+                # NOTE: there is a "skills-ref" tool but it's maintainance status is not clear
+                # so we don't use them yet
+                # https://github.com/agentskills/agentskills/tree/main/skills-ref
                 content = f.read()
                 # We suppose a yaml frontmatter
                 split = content.split("---")
                 if len(split) < 3:
                     raise ValueError(
-                        f"Invalid SKILL.md format in {skill_file}, missing frontmatter")
+                        f"Invalid format in {skill_file}, missing frontmatter")
                 fm_text = split[1]
                 fm = yaml.load(fm_text, Loader=yaml.FullLoader)
                 # parse as yaml
@@ -103,10 +103,73 @@ def discover_skills(skills_folder: str) -> tuple[list[SkillInfo], dict[str, str]
                 skill_info = SkillInfo(name=name, description=desc)
                 skill_info = SkillInfo(
                     name=name, description=desc, skill_file_path=skill_file)
-                skills_info.append(skill_info)
-                skills_location[name] = skill_file
+                discovered_skills.append((skill_info, skill_file))
             except Exception as e:
                 print(f"Error parsing skill file {skill_file}: {e}")
+    return discovered_skills
+
+
+def _discover_loose_skills(skills_folder: str) -> list[tuple[SkillInfo, str]]:
+    """
+    Discovers .agents/skills/foobar.md
+
+    Currently, we don't parse their frontmatter and rely only on filename + description
+
+    Technically, root md files are not standard,
+    yet they are more user friendly in the context of an agent for administrative tasks
+    @see https://github.com/agentskills/agentskills/issues/30
+    """
+    loose_skill_files = glob.glob(os.path.join(skills_folder, "*.md"))
+    discovered_skills: list[tuple[SkillInfo, str]] = []
+    for skill_file in loose_skill_files:
+        with open(skill_file, "r") as f:
+            try:
+                content = f.read()
+                name = os.path.splitext(os.path.basename(skill_file))[0]
+                # Description = beginning of file content
+                desc = content[0:157] + \
+                    "..." if len(content) > 160 else content
+                skill_info = SkillInfo(name=name, description=desc)
+                # TODO: override skill info with frontmatter parsing if there happens to be a frontmatter
+                discovered_skills.append((skill_info, skill_file))
+            except Exception as e:
+                print(f"Error parsing skill file {skill_file}: {e}")
+    return discovered_skills
+
+
+def discover_skills(skills_folder: str) -> tuple[list[SkillInfo], dict[str, str]]:
+    """
+    Discover SKILL.md files in the provided skill folder
+
+    Also supports "loose" skills: 
+        - located at root
+        - skill name = filename without extension
+        - skill description = file content (truncated if too long)
+        - no frontmatter configuration (may be supported in the future)
+
+    Expects skill names to be unique
+
+    Returns list of skill info for the LLM
+     and a map of skill name and location for loading the complete skill content
+    """
+    (standard_skills, loose_skills) = _discover_standard_skills(
+        skills_folder), _discover_loose_skills(skills_folder)
+    # Technically this
+    skills = [*loose_skills, *standard_skills]
+    skills_info = [s[0] for s in skills]
+    skills_location = {s[0].name: s[1] for s in skills}
+    skill_names = set({s[0].name for s in skills})
+    # TODO: we could improve dupes support by adding a prefix to the skill name based on location
+    if (len(skill_names) < len(skills)):
+        # Find dupes more precisely
+        seen = set({})
+        for (skill, _) in skills:
+            if skill.name in seen:
+                tp.print_info(
+                    f"Warning: Duplicate skill name found: {skill.name}, skill names must be unique.")
+            seen.add(skill.name)
+        raise ValueError(
+            f"Duplicate skill names found, skill names must be unique.")
     # parse content to extract skill name and description
     return (skills_info, skills_location)
 
