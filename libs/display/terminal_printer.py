@@ -66,6 +66,7 @@ class TerminalEventPrinter():
             keys = list(chunk["data"].keys())
             if len(keys) == 1 and "after_model" in keys[0] or "before_model" in keys[0]:
                 self.print_info(f"Middleware event: {keys[0]}")
+                self.print_chunk(chunk)
                 return
             else:
                 # For now we print unexpected chunks to see how the stream goes,
