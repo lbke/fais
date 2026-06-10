@@ -10,8 +10,6 @@ but the agent jump system is probably more explicit
 """
 
 
-import pprint
-
 from langchain.agents import AgentState
 from langchain.agents.middleware import Runtime, after_model, before_model, hook_config, wrap_model_call
 from langchain.messages import AIMessage, ToolMessage
@@ -39,14 +37,13 @@ def detect_return_direct(state: AgentState, runtime: Runtime):
     but it would be more compute intensive
     """
     last_msg = state["messages"][-1]
-    pprint.pprint(last_msg)
-
     # Detect a call to "return_direct" tool
     if isinstance(last_msg, AIMessage):
         return_direct = next(
             (tc for tc in last_msg.tool_calls if tc["name"] == "return_direct"), None)
-        print("Has return_direct been called?", bool(return_direct))
         if return_direct:
+            tp.print_info(
+                "Direct return triggered, tool output will be displayed with LLM postprocessing")
             # unknow state field are dismissed so use context instead to flag return_direct calls
             runtime.context["return_direct_called"] = True
             runtime.context["return_direct_expected_tool_calls"] = len(
@@ -58,7 +55,6 @@ def detect_return_direct(state: AgentState, runtime: Runtime):
 @hook_config(can_jump_to=["end"])
 def apply_return_direct(state: AgentState, runtime: Runtime):
     # If return_direct was called
-    print("context", runtime.context.get("return_direct_called"))
     if runtime.context.get("return_direct_called", False):
         expected_tool_calls = runtime.context.get(
             "return_direct_expected_tool_calls")
@@ -73,19 +69,20 @@ def apply_return_direct(state: AgentState, runtime: Runtime):
             else:
                 break
         # We are still waiting for some tool messages
-        # TODO: doesn't that really ever happens in a wrap_model middleware? Since tool calls are handled separately, we may always have all the tools here?
         if len(tool_msgs) < expected_tool_calls:
             tp.print_info(
-                f"Waiting for more tool calls (got {len(tool_msgs)} over{expected_tool_calls}), returning intermediate content")
+                f"Waiting for more tool calls (got {len(tool_msgs)} over {expected_tool_calls}), returning intermediate content")
             return None
         # We have collected all tool calls, we can return the aggregated content
         agg_content = ""
         for msg in tool_msgs:
+            # Ignore the return_direct tool itself
+            if msg.name == "return_direct":
+                continue
             agg_content += f"Output of tool {msg.name}:\n{msg.content}"
-        state["messages"].append(AIMessage(content=agg_content))
         # Alternative implementation would be using wrap_model_call and return "request" with no handler call
         # https://docs.langchain.com/oss/python/langchain/middleware/custom#agent-jumps
-        return {"messages": AIMessage(content=agg_content), "jump_to": "end"}
+        return {"messages": [AIMessage(content=agg_content)], "jump_to": "end"}
     return None
 
 

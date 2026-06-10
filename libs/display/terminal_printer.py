@@ -63,10 +63,15 @@ class TerminalEventPrinter():
         elif "HumanInTheLoopMiddleware.after_model" in data:
             pass
         else:
-            # For now we print unexpected chunks to see how the stream goes,
-            # given that typing is awful
-            console.print(PREFIX, "Chunk")
-            console.print(chunk)
+            keys = list(chunk["data"].keys())
+            if len(keys) == 1 and "after_model" in keys[0] or "before_model" in keys[0]:
+                self.print_info(f"Middleware event: {keys[0]}")
+                return
+            else:
+                # For now we print unexpected chunks to see how the stream goes,
+                # given that typing is awful
+                console.print(PREFIX, "Unknown chunk type:")
+                console.print(chunk)
 
     # def input_hil():
 
