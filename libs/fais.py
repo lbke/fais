@@ -7,7 +7,7 @@ from httpx import HTTPStatusError
 from langchain.agents.middleware import HumanInTheLoopMiddleware
 from langchain_mistralai import ChatMistralAI
 from langchain.agents import create_agent
-from langgraph.types import Command, StreamPart
+from langgraph.types import Command
 from prompt_toolkit.shortcuts import choice
 from prompt_toolkit.filters import is_done
 
@@ -15,6 +15,7 @@ from prompt_toolkit.filters import is_done
 from libs.cli.parse_args import parse_args
 from libs.contexteng.prompt_builder import build_context, build_prompt
 from libs.contexteng.skills_resolver import discover_skills, load_skills, resolve_skills_folder
+from libs.middlewares.return_direct import ReturnDirectMiddlewares, return_direct
 from libs.middlewares.handle_file_errors import HandleFileErrorsMiddleware
 from libs.tools.thunderbird import TOOLS as thunderbird_tools
 from libs.tools.filemanager import TOOLS as filemanager_tools, copy_file
@@ -22,6 +23,7 @@ from libs.tools.documents import TOOLS as document_tools
 from libs.tools.planning import TOOLS as planning_tools
 from libs.tools.fileexplorer import TOOLS as fileexplorer_tools
 from libs.tools.internet import TOOLS as internet_tools
+from libs.tools.docx import TOOLS as docx_tools, TOOLS_DESCRIPTION as docx_tools_description
 from libs.display.terminal_printer import tp
 from langgraph.checkpoint.memory import InMemorySaver
 
@@ -30,8 +32,11 @@ from rich.console import Console
 console = Console()
 
 
-ALL_TOOLS = [*document_tools, *planning_tools,
-             *fileexplorer_tools, *filemanager_tools, *thunderbird_tools, *internet_tools, load_skills]
+# Model swapping, state management etc.
+AGENTIC_TOOLS = [load_skills, return_direct]
+UTILITY_TOOLS = [*document_tools, *planning_tools,
+                 *fileexplorer_tools, *filemanager_tools, *thunderbird_tools, *internet_tools, *docx_tools]
+ALL_TOOLS = [*AGENTIC_TOOLS, *UTILITY_TOOLS]
 
 
 BIG_MODEL = "mistral-large-latest"
@@ -47,7 +52,7 @@ class ContextSchema(TypedDict):
 
 agent = create_agent(
     model=model,
-    system_prompt="""
+    system_prompt=f"""
     You are "fais", an AI agent running as a CLI.
     You speak French fluently.
 
@@ -59,14 +64,17 @@ agent = create_agent(
     Do not propose any subsequent task, just do what you are asked.
 
     ## Tools at your disposal
-    - Handling text documents: {document_tools_prompt}
+    - Handling text documents
     - Exploring files and folders
     - Planning events in a calendar, handling a schedule
+    - Running basic fetch calls to whitelisted URLs (beta, only opens LBKE for now)
+    - {docx_tools_description}
 """,
     tools=[
         *ALL_TOOLS
     ],
     middleware=[
+        *ReturnDirectMiddlewares,
         HandleFileErrorsMiddleware,
         HumanInTheLoopMiddleware(
             interrupt_on={
