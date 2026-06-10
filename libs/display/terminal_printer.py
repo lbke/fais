@@ -22,6 +22,9 @@ class TerminalEventPrinter():
     # LangChain elements
     def print_model_data(self, data):
         msg: AIMessage = data["model"]["messages"][-1]
+        self._print_ai_message(msg)
+
+    def _print_ai_message(self, msg: AIMessage):
         if len(msg.tool_calls):
             if len(msg.tool_calls) > 1:
                 console.print(
@@ -62,11 +65,17 @@ class TerminalEventPrinter():
             pass
         elif "HumanInTheLoopMiddleware.after_model" in data:
             pass
+        elif data.get("apply_return_direct.before_model", None):
+            console.print(
+                PREFIX, "Direct return, skipping LLM postprocessing and returning tool content directly")
+            if data["apply_return_direct.before_model"]["jump_to"] == "end":
+                self._print_ai_message(
+                    data["apply_return_direct.before_model"]["messages"][-1])
         else:
             keys = list(chunk["data"].keys())
             if len(keys) == 1 and "after_model" in keys[0] or "before_model" in keys[0]:
                 self.print_info(f"Middleware event: {keys[0]}")
-                self.print_chunk(chunk)
+                console.print(chunk)
                 return
             else:
                 # For now we print unexpected chunks to see how the stream goes,
