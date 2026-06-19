@@ -63,4 +63,4 @@ fais "prompt" ./file1 ./file2
 
 ## About
 
-"Fais" is French for "do" and pronounces  pronounces "[fɛ]", like "fay" without the "y" part. Do not pronounce the "s" or the French will mock you for some reason, and it will be conflated with "FAISS" library of algorithms. [You can listen to the proper pronounciation here](https://www.youtube.com/watch?v=y_RkLxMarTw).
+"Fais" is French for "do" and pronounces  pronounces "[fɛ]", like "fay" without the "y" part. Do not pronounce the "s" or the French will mock you for some reason, and it will be conflated with "FAISS" library of algorithms. [You can listen to the proper pronounciation here](https://www.youtube.com/watch?v=HnYLCQlWzMY).
