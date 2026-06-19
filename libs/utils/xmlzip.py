@@ -38,13 +38,18 @@ def _get_zip_content_file_name(file_path: str) -> str:
 def extract_content_xml_from_zip(file_path: str) -> str:
     """
     Get the main content file XML content
+
+    It's NOT decoded (with utf-8) as the XML file itself contains the encoding information
     """
     try:
         with ZipFile(file_path, 'r') as zf:
             # print(zf.printdir())
             # Read content.xml from the ODT file
             content_file = _get_zip_content_file_name(file_path)
-            content_xml = zf.read(content_file).decode('utf-8')
+            content_xml = zf.read(content_file)
+            # NOTE: we don't decode as encoding is already signalled in the XML file
+            # @see https://stackoverflow.com/questions/28534460/lxml-etree-xml-valueerror-for-unicode-string
+            # .decode('utf-8')
             return content_xml
     except FileNotFoundError as err:
         # File not found are handled at tool level

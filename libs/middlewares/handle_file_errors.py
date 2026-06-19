@@ -3,7 +3,6 @@ from zipfile import BadZipFile
 
 from langchain.agents.middleware import wrap_tool_call
 from langchain.messages import ToolMessage
-from langchain.tools import ToolException
 
 
 @wrap_tool_call
